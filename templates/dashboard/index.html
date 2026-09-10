@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Dashboard | FGMDSS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+<div><h1>Forest Geospatial Management</h1><p class="text-muted">Decision-Support System</p></div>
+<form><select name="forest" class="form-select" onchange="this.form.submit()">{% for f in forests %}<option value="{{ f.code }}" {% if forest.id == f.id %}selected{% endif %}>{{ f.name }}</option>{% endfor %}</select></form>
+</div>
+{% if forest %}
+<div class="row g-3 mb-3">
+<div class="col-md-3"><div class="card kpi"><span>Forest Area</span><strong>{{ forest.area_ha|default:"Not imported" }}</strong><small>ha</small></div></div>
+<div class="col-md-3"><div class="card kpi"><span>Default Year</span><strong>{{ forest.profile.default_year|default:"—" }}</strong></div></div>
+<div class="col-md-3"><div class="card kpi"><span>LULC Maps</span><strong>{{ forest.lulc_maps.count }}</strong></div></div>
+<div class="col-md-3"><div class="card kpi"><span>Management Zones</span><strong>{{ forest.management_zones.count }}</strong></div></div>
+</div>
+<div class="alert alert-info">Research products are shown only after actual datasets are imported. Tree species, invasive species and field observations are not fabricated.</div>
+<div class="card"><div class="card-body"><h4>Workflow</h4><div class="workflow">Boundary → Profile → LULC → Analytical Products → Statistics → Web GIS → Threats → Priorities → Management → Monitoring</div></div></div>
+{% else %}<div class="alert alert-warning">No active forest configured. Run the Oloolua seed command or create a forest in Admin.</div>{% endif %}
+{% endblock %}

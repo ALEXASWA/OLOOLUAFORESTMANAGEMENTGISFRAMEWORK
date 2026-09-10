@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}LULC | FGMDSS{% endblock %}
+{% block content %}<h1>LULC & Change</h1>
+{% if forest %}<p class="text-muted">{{ forest.name }}</p>
+<table class="table table-striped"><thead><tr><th>Year</th><th>Version</th><th>Source</th><th>Resolution</th><th>Accuracy</th><th>Statistics</th></tr></thead>
+<tbody>{% for m in maps %}<tr><td>{{m.year}}</td><td>{{m.version}}</td><td>{{m.source|default:"—"}}</td><td>{{m.resolution_m|default:"—"}}</td><td>{{m.accuracy|default:"—"}}</td><td>{{m.statistics.count}}</td></tr>{% empty %}<tr><td colspan="6">No LULC datasets imported yet.</td></tr>{% endfor %}</tbody></table>
+{% else %}<div class="alert alert-warning">No forest configured.</div>{% endif %}{% endblock %}

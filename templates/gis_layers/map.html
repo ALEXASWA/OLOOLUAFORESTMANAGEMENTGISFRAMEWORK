@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load static %}{% block title %}Web GIS | FGMDSS{% endblock %}
+{% block head %}<style>#map{height:70vh;min-height:520px}.map-panel{max-height:70vh;overflow:auto}</style>{% endblock %}
+{% block content %}
+<div class="row g-2">
+<div class="col-lg-3"><div class="card map-panel"><div class="card-body">
+<h5>GIS Layers</h5>
+<label class="form-label">Forest</label>
+<select id="forestSelect" class="form-select mb-3">{% for f in forests %}<option value="{{ f.code }}" {% if forest.id == f.id %}selected{% endif %}>{{ f.name }}</option>{% endfor %}</select>
+<div class="form-check"><input class="form-check-input" type="checkbox" id="boundary" checked><label class="form-check-label">Forest boundary</label></div>
+<div class="form-check"><input class="form-check-input" type="checkbox" id="zones"><label class="form-check-label">Management zones</label></div>
+<hr><small class="text-muted">Raster products are referenced from the database; they are not loaded wholesale into the browser.</small>
+</div></div></div>
+<div class="col-lg-9"><div id="map" class="border rounded"></div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/ol@10.2.1/dist/ol.js"></script>
+<script>
+window.FGMDSS = {forestCode: "{{ forest.code|default:'' }}"};
+</script>
+<script src="{% static 'js/map.js' %}"></script>
+{% endblock %}

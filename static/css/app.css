@@ -1,0 +1,6 @@
+body { background:#f5f7fa; }
+.card { border:0; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+.kpi { padding:1.25rem; min-height:120px; }
+.kpi span { color:#667085; display:block; }
+.kpi strong { font-size:2rem; display:block; }
+.workflow { font-weight:600; padding:1rem; background:#eef4f0; border-radius:.5rem; overflow:auto; }
