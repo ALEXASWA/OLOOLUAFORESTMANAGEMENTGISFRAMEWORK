@@ -1,17 +1,111 @@
-{% extends "base.html" %}{% block title %}Dashboard | FGMDSS{% endblock %}
+{% extends "base.html" %}{% block title %}Overview | FM-GDSS{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-<div><h1>Forest Geospatial Management</h1><p class="text-muted">Decision-Support System</p></div>
-<form><select name="forest" class="form-select" onchange="this.form.submit()">{% for f in forests %}<option value="{{ f.code }}" {% if forest.id == f.id %}selected{% endif %}>{{ f.name }}</option>{% endfor %}</select></form>
-</div>
+<section class="hero-panel reveal">
+    <div><span class="hero-kicker"><i class="bi bi-stars"></i> EARTH OBSERVATION <b>•</b> GIS <b>•</b> DECISION
+            SUPPORT</span>
+        <h1>{{ forest.name|default:"Forest" }} Intelligence</h1>
+        <p>Spatial assessment of forest condition, land-cover dynamics, ecological indicators, anthropogenic pressure
+            and management priorities.</p>
+        {% if forest %}
+        <div class="hero-meta"><span><i class="bi bi-geo-alt"></i> {{ forest.county|default:"Location not recorded" }},
+                {{ forest.country|default:"Kenya" }}</span><span><i class="bi bi-calendar3"></i> Analysis year {{
+                forest.profile.default_year|default:"Not configured" }}</span></div>
+        {% endif %}
+    </div>
+    <div class="hero-side-mark"><i class="bi bi-tree-fill"></i><span>OLOOLUA<br>FOREST</span></div>
+</section>
 {% if forest %}
-<div class="row g-3 mb-3">
-<div class="col-md-3"><div class="card kpi"><span>Forest Area</span><strong>{{ forest.area_ha|default:"Not imported" }}</strong><small>ha</small></div></div>
-<div class="col-md-3"><div class="card kpi"><span>Default Year</span><strong>{{ forest.profile.default_year|default:"—" }}</strong></div></div>
-<div class="col-md-3"><div class="card kpi"><span>LULC Maps</span><strong>{{ forest.lulc_maps.count }}</strong></div></div>
-<div class="col-md-3"><div class="card kpi"><span>Management Zones</span><strong>{{ forest.management_zones.count }}</strong></div></div>
+<div class="section-heading reveal reveal-delay-1">
+    <div><span class="muted-label">Current assessment</span>
+        <h2>Forest at a glance</h2>
+    </div>
+    <form class="forest-picker">
+        <label for="forest-select">Forest</label>
+        <select id="forest-select" name="forest" data-selected="{{ forest.code }}" onchange="this.form.submit()">
+            {% for f in forests %}
+            <option value="{{ f.code }}">{{ f.name }}</option>
+            {% endfor %}
+        </select>
+    </form>
 </div>
-<div class="alert alert-info">Research products are shown only after actual datasets are imported. Tree species, invasive species and field observations are not fabricated.</div>
-<div class="card"><div class="card-body"><h4>Workflow</h4><div class="workflow">Boundary → Profile → LULC → Analytical Products → Statistics → Web GIS → Threats → Priorities → Management → Monitoring</div></div></div>
-{% else %}<div class="alert alert-warning">No active forest configured. Run the Oloolua seed command or create a forest in Admin.</div>{% endif %}
+<div class="kpi-grid">
+    <article class="kpi-card reveal reveal-delay-1">
+        <div class="kpi-icon green"><i class="bi bi-bounding-box-circles"></i></div><span class="muted-label">Forest
+            area</span><strong>{{ forest.area_ha|default:"Not available" }}</strong><small>Geometry-derived area</small>
+    </article>
+    <article class="kpi-card reveal reveal-delay-2">
+        <div class="kpi-icon blue"><i class="bi bi-calendar2-range"></i></div><span class="muted-label">Analysis
+            horizon</span><strong>{{ forest.profile.default_year|default:"—" }}</strong><small>Profile
+            configuration</small>
+    </article>
+    <article class="kpi-card reveal reveal-delay-3">
+        <div class="kpi-icon amber"><i class="bi bi-layers"></i></div><span class="muted-label">Registered
+            products</span><strong>{{ forest.raster_layers.count }}</strong><small>Raster layers in catalogue</small>
+    </article>
+    <article class="kpi-card reveal reveal-delay-3">
+        <div class="kpi-icon violet"><i class="bi bi-diagram-3"></i></div><span class="muted-label">Management
+            zones</span><strong>{{ forest.management_zones.count }}</strong><small>Proposed analytical zones</small>
+    </article>
+</div>
+<div class="workspace-grid">
+    <section class="panel overview-map-card reveal reveal-delay-2">
+        <div class="panel-heading">
+            <div><span class="muted-label">Spatial intelligence</span>
+                <h3>Explore the forest landscape</h3>
+            </div><a class="text-action" href="/gis/">Open Web GIS <i class="bi bi-arrow-up-right"></i></a>
+        </div>
+        <div class="map-preview">
+            <div class="map-preview-grid"></div>
+            <div class="map-preview-center"><i class="bi bi-globe2"></i><strong>Interactive map
+                    workspace</strong><span>Boundary, layers and spatial products</span></div>
+            <div class="map-preview-scale">OLOOLUA · {{ forest.profile.default_year|default:"CURRENT" }}</div>
+        </div>
+    </section>
+    <section class="panel status-card reveal reveal-delay-3">
+        <div class="panel-heading">
+            <div><span class="muted-label">Provenance</span>
+                <h3>Data availability</h3>
+            </div><i class="bi bi-info-circle status-info"></i>
+        </div>
+        <div class="availability-list">
+            <div><span class="availability-dot available"></span><span>Forest configuration</span><b>Available</b></div>
+            <div><span class="availability-dot available"></span><span>Earth observation products</span><b>Catalogue
+                    status</b></div>
+            <div><span class="availability-dot available"></span><span>Management framework</span><b>Catalogue
+                    status</b></div>
+            <div><span class="availability-dot unavailable"></span><span>Species and field observations</span><b>Future
+                    data module</b></div>
+        </div>
+        <div class="status-note"><i class="bi bi-shield-check"></i><span>Only registered, validated datasets are
+                surfaced in this workspace. Missing scientific inputs are never replaced with estimates.</span></div>
+    </section>
+</div>
+<div class="lower-grid">
+    <section class="panel workflow-card reveal">
+        <div class="panel-heading">
+            <div><span class="muted-label">Analytical chain</span>
+                <h3>From observation to action</h3>
+            </div>
+        </div>
+        <div class="workflow-steps"><span><i class="bi bi-satellite"></i><b>Earth observation</b></span><i
+                class="bi bi-chevron-right"></i><span><i class="bi bi-layers"></i><b>Spatial analysis</b></span><i
+                class="bi bi-chevron-right"></i><span><i class="bi bi-shield-check"></i><b>Decision support</b></span><i
+                class="bi bi-chevron-right"></i><span><i class="bi bi-activity"></i><b>Monitoring</b></span></div>
+    </section>
+    <section class="panel note-card reveal reveal-delay-1">
+        <div class="note-icon"><i class="bi bi-lightbulb"></i></div>
+        <div><span class="muted-label">Research note</span>
+            <p>Analytical indicators should be interpreted alongside their source metadata, spatial resolution and
+                stated methodological limitations.</p>
+        </div>
+    </section>
+</div>
+{% endif %}
+{% if not forest %}<section class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-tree"></i></div><span class="muted-label">Workspace not
+        configured</span>
+    <h2>No active forest is registered</h2>
+    <p>Run the Oloolua configuration command or create a forest record in Administration to begin.</p><a
+        class="btn btn-forest" href="/admin/">Open administration</a>
+</section>{% endif %}
 {% endblock %}

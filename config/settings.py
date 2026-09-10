@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +55,11 @@ DATABASES = {
     }
 }
 
+GIS_DATA_ROOT = Path(os.getenv("GIS_DATA_ROOT", BASE_DIR / "data"))
+OLOOLUA_DATA_ROOT = Path(os.getenv("OLOOLUA_DATA_ROOT", GIS_DATA_ROOT / "oloolua"))
+RASTER_DATA_ROOT = Path(os.getenv("RASTER_DATA_ROOT", OLOOLUA_DATA_ROOT))
+VECTOR_DATA_ROOT = Path(os.getenv("VECTOR_DATA_ROOT", OLOOLUA_DATA_ROOT))
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -84,6 +90,12 @@ REST_FRAMEWORK = {
     ],
 }
 
-# GDAL/GEOS can be configured here if Windows cannot locate them.
-GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH") or None
-GEOS_LIBRARY_PATH = os.getenv("GEOS_LIBRARY_PATH") or None
+# GDAL/GEOS can be overridden in .env. The fallback supports the bundled
+# Windows wheels used by the project's active virtual environment.
+_osgeo_dir = Path(sys.prefix) / "Lib" / "site-packages" / "osgeo"
+GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH") or (
+    str(_osgeo_dir / "gdal.dll") if (_osgeo_dir / "gdal.dll").exists() else None
+)
+GEOS_LIBRARY_PATH = os.getenv("GEOS_LIBRARY_PATH") or (
+    str(_osgeo_dir / "geos_c.dll") if (_osgeo_dir / "geos_c.dll").exists() else None
+)

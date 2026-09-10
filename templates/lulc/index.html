@@ -1,6 +1,68 @@
-{% extends "base.html" %}{% block title %}LULC | FGMDSS{% endblock %}
-{% block content %}<h1>LULC & Change</h1>
-{% if forest %}<p class="text-muted">{{ forest.name }}</p>
-<table class="table table-striped"><thead><tr><th>Year</th><th>Version</th><th>Source</th><th>Resolution</th><th>Accuracy</th><th>Statistics</th></tr></thead>
-<tbody>{% for m in maps %}<tr><td>{{m.year}}</td><td>{{m.version}}</td><td>{{m.source|default:"—"}}</td><td>{{m.resolution_m|default:"—"}}</td><td>{{m.accuracy|default:"—"}}</td><td>{{m.statistics.count}}</td></tr>{% empty %}<tr><td colspan="6">No LULC datasets imported yet.</td></tr>{% endfor %}</tbody></table>
-{% else %}<div class="alert alert-warning">No forest configured.</div>{% endif %}{% endblock %}
+{% extends "base.html" %}{% block title %}LULC & Change | FM-GDSS{% endblock %}
+{% block content %}
+<div class="page-intro">
+    <div><span class="muted-label">Land-cover dynamics</span>
+        <h1>Land Use / Land Cover</h1>
+        <p>Multi-temporal assessment of landscape composition and change for registered forest products.</p>
+    </div><span class="data-badge derived"><i class="bi bi-diagram-3"></i> {{ forest.name|default:"Forest workspace"
+        }}</span>
+</div>
+{% if forest %}
+<div class="analytics-strip">
+    <div><span class="muted-label">Registered years</span><strong>{{ maps.count }}</strong><small>dataset{{
+            maps.count|pluralize }}</small></div>
+    <div><span class="muted-label">Classification</span><strong>{{ forest.lulc_classes.count|default:"—"
+            }}</strong><small>configured class{{ forest.lulc_classes.count|pluralize }}</small></div>
+    <div><span class="muted-label">Data status</span><strong class="status-text">{{ maps.count|yesno:"Available,Not
+            available" }}</strong><small>validated catalogue records</small></div>
+</div>
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Multi-temporal catalogue</span>
+            <h2>Registered LULC datasets</h2>
+        </div><a class="text-action" href="/gis/">View in Web GIS <i class="bi bi-arrow-up-right"></i></a>
+    </div>
+    <div class="table-responsive">
+        <table class="professional-table">
+            <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Version</th>
+                    <th>Source</th>
+                    <th>Resolution</th>
+                    <th>Accuracy</th>
+                    <th>Statistics</th>
+                </tr>
+            </thead>
+            <tbody>{% for m in maps %}<tr>
+                    <td><strong class="year-cell">{{ m.year }}</strong></td>
+                    <td><span class="soft-tag">v{{ m.version }}</span></td>
+                    <td>{{ m.source|default:"Not recorded" }}</td>
+                    <td>{{ m.resolution_m|default:"Not recorded" }}</td>
+                    <td>{{ m.accuracy|default:"Not reported" }}</td>
+                    <td><span class="count-cell"><i class="bi bi-bar-chart"></i> {{ m.statistics.count }}</span></td>
+                </tr>{% empty %}<tr>
+                    <td colspan="6">
+                        <div class="table-empty"><i class="bi bi-layers"></i><strong>Data not currently
+                                available</strong><span>No validated LULC dataset is registered for this forest.</span>
+                        </div>
+                    </td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </div>
+</section>
+<div class="methodology-panel"><i class="bi bi-shield-check"></i>
+    <div><span class="muted-label">Interpretation note</span>
+        <p>Class areas, transitions and accuracy statements should be read from the imported dataset metadata. This page
+            does not infer statistics where source records are absent.</p>
+    </div>
+</div>
+{% endif %}
+{% if not forest %}<section class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-layers"></i></div><span class="muted-label">Workspace not
+        configured</span>
+    <h2>No active forest is registered</h2>
+    <p>Create or configure a forest before registering land-cover products.</p><a class="btn btn-forest"
+        href="/admin/">Open administration</a>
+</section>{% endif %}
+{% endblock %}
