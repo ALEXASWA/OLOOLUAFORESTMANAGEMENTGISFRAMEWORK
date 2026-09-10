@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FGMDSS — Forest Geospatial Management and Decision-Support System
 
 A reusable Django/GeoDjango/PostGIS forest management framework, demonstrated first with Oloolua Forest.
@@ -200,3 +201,6 @@ python manage.py test
 ```
 
 For a PostGIS-backed test environment, use the same database engine and ensure PostGIS is enabled.
+=======
+# OLOOLUAFORESTMANAGEMENTGISFRAMEWORK
+>>>>>>> 82b46a92b166c17d557f896838213b4781d6e9fd
