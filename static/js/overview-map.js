@@ -83,7 +83,7 @@
         })
         .then(function (data) {
             const format = new ol.format.GeoJSON();
-            const features = format.readFeatures(data, { featureProjection: "EPSG:3857" });
+            const features = format.readFeatures(data, { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" });
             features.forEach(function (feature) {
                 const key = feature.get("layer");
                 if (sources[key]) sources[key].addFeature(feature);

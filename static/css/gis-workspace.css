@@ -972,8 +972,8 @@ body.gis-immersive .app-footer {
 }
 
 .gis-legend {
-    flex: 0 1 auto;
-    max-height: 48%;
+    flex: 0 0 auto;
+    max-height: 100%;
     min-height: 42px;
     min-width: 250px;
     resize: both;
@@ -1772,7 +1772,7 @@ body.gis-immersive .app-footer {
     }
 
     .gis-legend {
-        max-height: 42%;
+        max-height: 100%;
     }
 
     .gis-compare-bar {

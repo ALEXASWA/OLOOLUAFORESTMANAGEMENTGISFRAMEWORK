@@ -1,5 +1,37 @@
 const CLASS_COLORS = { Forest: "#006400", Grassland: "#90EE90", Quarry: "#A0522D", "Quarry / Bare land": "#A0522D", "Built-up": "#D73027" };
 const classColor = (name) => CLASS_COLORS[name] || "#496d58";
+const BAR_PALETTE = ["#2d7253", "#c78a2c", "#2d5f9e", "#8e5b2f", "#0f766e", "#7c3aed"];
+const INDEX_COLORS = { "human pressure": "#c78a2c", "conservation priority": "#2d7253", "rehabilitation priority": "#2d5f9e" };
+const indexColor = (name, fallback) => INDEX_COLORS[String(name).toLowerCase()] || fallback;
+const formatHa = (value) => `${Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} ha`;
+const zoneChartOption = (zones) => {
+    const total = zones.reduce((sum, row) => sum + Number(row.area_ha || 0), 0);
+    const share = (row) => Number.isFinite(Number(row.percentage)) ? Number(row.percentage) : (total ? Number(row.area_ha || 0) / total * 100 : 0);
+    return {
+        animationDuration: 420,
+        tooltip: {
+            trigger: "item",
+            formatter: (point) => {
+                const row = zones[point.dataIndex] || {};
+                return `<strong>${escapeHtml(point.name)}</strong><br/>${formatHa(point.value)}<br/>${share(row).toLocaleString(undefined, { maximumFractionDigits: 1 })}% of zoned area`;
+            },
+        },
+        label: { color: "#2f4a3e", fontSize: 10, lineHeight: 14, formatter: (point) => `${point.name}\n${share(zones[point.dataIndex] || {}).toLocaleString(undefined, { maximumFractionDigits: 1 })}%` },
+        labelLine: { length: 10, length2: 8, lineStyle: { color: "#b9c7bf" } },
+        graphic: [
+            { type: "text", left: "center", top: "44%", style: { text: "Zoned area", fill: "#7d8f85", fontSize: 10, textAlign: "center" } },
+            { type: "text", left: "center", top: "49%", style: { text: formatHa(total), fill: "#1f3329", fontSize: 13, fontWeight: 700, textAlign: "center" } },
+        ],
+        series: [{
+            type: "pie",
+            radius: ["38%", "66%"],
+            center: ["50%", "52%"],
+            data: zones.map((row) => ({ name: row.zone_name, value: Number(row.area_ha || 0) })),
+            itemStyle: { borderColor: "#fff", borderWidth: 2 },
+            emphasis: { scaleSize: 6 },
+        }],
+    };
+};
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
 
 function renderClassCoverage(data) {
@@ -115,17 +147,56 @@ function renderClassCoverage(data) {
             return;
         } else if (chartKey === "ecology-core-edge") {
             const rows = data.indicators["Forest edge and core structure"] || [];
-            option = { ...option, xAxis: { type: "category", data: rows.map((row) => row.Structure || row.structure || "Indicator") }, yAxis: { type: "value", name: "ha" }, series: [{ type: "bar", data: rows.map((row) => Number(row.Area_ha || row.area_ha || 0)), itemStyle: { color: "#2d7253" } }] };
+            const labelOf = (row) => row.Structure || row.structure || "Indicator";
+            option = {
+                ...option,
+                tooltip: { trigger: "axis", formatter: (params) => `${escapeHtml(params[0]?.axisValue ?? "")}<br/>${params.map((point) => `${point.marker}${formatHa(point.value)}`).join("")}` },
+                xAxis: { type: "category", data: rows.map(labelOf) },
+                yAxis: { type: "value", name: "ha" },
+                series: [{
+                    type: "bar",
+                    barMaxWidth: 96,
+                    data: rows.map((row, index) => {
+                        const name = labelOf(row);
+                        const color = /edge/i.test(name) ? "#c78a2c" : /core/i.test(name) ? "#1b5e20" : BAR_PALETTE[index % BAR_PALETTE.length];
+                        return { value: Number(row.Area_ha || row.area_ha || 0), itemStyle: { color } };
+                    }),
+                    label: { show: true, position: "top", color: "#2f4a3e", fontSize: 10, formatter: (point) => formatHa(point.value) },
+                }],
+            };
         } else if (section === "pressure") {
             const rows = data.indicators["Remote-sensing anthropogenic pressure proxy"] || [];
-            option = { ...option, xAxis: { type: "category", data: rows.map((row) => row.Indicator || "Indicator") }, yAxis: { type: "value", name: "ha" }, series: [{ type: "bar", data: rows.map((row) => Number(row.Area_ha || 0)), itemStyle: { color: "#c78a2c" } }] };
+            option = {
+                ...option,
+                tooltip: { trigger: "axis", formatter: (params) => `${escapeHtml(params[0]?.axisValue ?? "")}<br/>${params.map((point) => `${point.marker}${formatHa(point.value)}`).join("")}` },
+                xAxis: { type: "category", data: rows.map((row) => row.Indicator || "Indicator") },
+                yAxis: { type: "value", name: "ha" },
+                series: [{
+                    type: "bar",
+                    barMaxWidth: 72,
+                    data: rows.map((row, index) => ({ value: Number(row.Area_ha || 0), itemStyle: { color: BAR_PALETTE[index % BAR_PALETTE.length] } })),
+                }],
+            };
         } else if (section === "conservation") {
             const rows = data.indicators["Management indices"] || [];
-            option = { ...option, xAxis: { type: "category", data: rows.map((row) => row.Indicator || "Index") }, yAxis: { type: "value" }, series: [{ type: "bar", data: rows.map((row) => Number(row.Mean || 0)), itemStyle: { color: "#496d58" } }] };
+            option = {
+                ...option,
+                tooltip: { trigger: "axis", formatter: (params) => `${escapeHtml(params[0]?.axisValue ?? "")}<br/>${params.map((point) => `${point.marker}index: ${Number(point.value).toFixed(3)}`).join("")}` },
+                xAxis: { type: "category", data: rows.map((row) => row.Indicator || "Index") },
+                yAxis: { type: "value", name: "index", min: 0 },
+                series: [{
+                    type: "bar",
+                    barMaxWidth: 96,
+                    data: rows.map((row, index) => {
+                        const name = row.Indicator || "Index";
+                        return { value: Number(row.Mean || 0), itemStyle: { color: indexColor(name, BAR_PALETTE[index % BAR_PALETTE.length]) } };
+                    }),
+                }],
+            };
         } else if (section === "management") {
-            option = { ...option, tooltip: { trigger: "item" }, series: [{ type: "pie", radius: ["35%", "68%"], data: data.management_zones.map((row) => ({ name: row.zone_name, value: row.area_ha })) }] };
+            option = zoneChartOption(data.management_zones || []);
         } else if (section === "overview-management") {
-            option = { ...option, tooltip: { trigger: "item" }, series: [{ type: "pie", radius: ["35%", "68%"], data: data.management_zones.map((row) => ({ name: row.zone_name, value: row.area_ha })) }] };
+            option = zoneChartOption(data.management_zones || []);
         } else if (section === "training") {
             option = { ...option, xAxis: { type: "category", data: data.training.datasets.map((row) => row.name) }, yAxis: { type: "value", name: "samples" }, series: [{ name: "Training", type: "bar", data: data.training.datasets.map((row) => row.training_count) }, { name: "Validation", type: "bar", data: data.training.datasets.map((row) => row.validation_count) }] };
         }

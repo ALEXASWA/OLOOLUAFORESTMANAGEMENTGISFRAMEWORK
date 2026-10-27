@@ -38,6 +38,12 @@ class ManagementZoneViewSet(viewsets.ModelViewSet):
     permission_classes = [ForestApiPermission]
 
 
+def _geojson_wgs84(geometry):
+    if not geometry:
+        return None
+    return json.loads(geometry.transform(4326, clone=True).geojson)
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def forest_workspace(request, code):
@@ -56,13 +62,13 @@ def forest_workspace(request, code):
     if forest.geometry:
         features.append({
             "type": "Feature",
-            "geometry": json.loads(forest.geometry.geojson),
+            "geometry": _geojson_wgs84(forest.geometry),
             "properties": {"forest": forest.code, "layer": "original", "label": "Original forest boundary"},
         })
     if forest.analytical_buffer:
         features.append({
             "type": "Feature",
-            "geometry": json.loads(forest.analytical_buffer.geojson),
+            "geometry": _geojson_wgs84(forest.analytical_buffer),
             "properties": {
                 "forest": forest.code,
                 "layer": "buffer",
@@ -70,10 +76,11 @@ def forest_workspace(request, code):
             },
         })
     for sample in LULCTrainingSample.objects.filter(forest=forest).only("geometry", "split", "class_id", "class_name"):
-        if sample.geometry:
+        geometry = _geojson_wgs84(sample.geometry)
+        if geometry:
             features.append({
                 "type": "Feature",
-                "geometry": json.loads(sample.geometry.geojson),
+                "geometry": geometry,
                 "properties": {
                     "forest": forest.code, "layer": sample.split.lower(),
                     "label": f"{sample.class_name} ({sample.split.lower()})",
@@ -81,9 +88,12 @@ def forest_workspace(request, code):
                 },
             })
     for zone in ManagementZone.objects.filter(forest=forest).select_related("zone_type"):
+        geometry = _geojson_wgs84(zone.geometry)
+        if not geometry:
+            continue
         features.append({
             "type": "Feature",
-            "geometry": json.loads(zone.geometry.geojson),
+            "geometry": geometry,
             "properties": {
                 "forest": forest.code, "layer": "management-zone",
                 "label": zone.zone_type.name, "code": zone.code,

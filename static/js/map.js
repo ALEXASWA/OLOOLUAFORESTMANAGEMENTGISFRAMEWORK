@@ -1838,7 +1838,7 @@
       panel.style.right = "auto";
       panel.style.bottom = "auto";
       panel.style.width = `${rect.width}px`;
-      panel.style.maxHeight = `${Math.min(rect.height || 320, window.innerHeight - 20)}px`;
+      panel.style.maxHeight = `${Math.max(160, window.innerHeight - rect.top - 12)}px`;
       panel.style.zIndex = "60";
       panel.classList.add("is-floating");
       state.legendFloating = true;
@@ -1852,6 +1852,7 @@
       const y = Math.min(Math.max(8, event.clientY - drag.dy), window.innerHeight - 60);
       panel.style.left = `${x}px`;
       panel.style.top = `${y}px`;
+      panel.style.maxHeight = `${Math.max(160, window.innerHeight - y - 12)}px`;
     });
     const end = () => { drag = null; };
     handle.addEventListener("pointerup", end);
@@ -1922,7 +1923,7 @@
 
       Object.values(vectorSources).forEach((source) => source.clear());
       const format = new ol.format.GeoJSON();
-      const features = format.readFeatures(workspace, { featureProjection: "EPSG:3857" });
+      const features = format.readFeatures(workspace, { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" });
       const counts = { training: 0, validation: 0, "management-zone": 0 };
       features.forEach((feature) => {
         const key = feature.get("layer");
