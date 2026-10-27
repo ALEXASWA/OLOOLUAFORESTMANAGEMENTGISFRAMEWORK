@@ -5,10 +5,30 @@ from apps.management.models import ManagementZone
 from apps.field_data.models import FieldObservation
 
 class ForestSerializer(GeoFeatureModelSerializer):
+    extent = serializers.SerializerMethodField()
+    centroid = serializers.SerializerMethodField()
+
+    def _analysis_geometry(self, obj):
+        return obj.analytical_buffer or obj.geometry
+
+    def get_extent(self, obj):
+        geometry = self._analysis_geometry(obj)
+        if not geometry:
+            return None
+        transformed = geometry.transform(4326, clone=True)
+        return list(transformed.extent)
+
+    def get_centroid(self, obj):
+        geometry = self._analysis_geometry(obj)
+        if not geometry:
+            return None
+        point = geometry.transform(4326, clone=True).centroid
+        return [point.x, point.y]
+
     class Meta:
         model = Forest
         geo_field = "geometry"
-        fields = ["id","name","code","country","county","sub_county","management_authority","description","area_ha","status","geometry"]
+        fields = ["id","name","code","country","county","sub_county","management_authority","description","area_ha","status","geometry","extent","centroid"]
 
 class BoundarySerializer(GeoFeatureModelSerializer):
     class Meta:

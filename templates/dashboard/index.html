@@ -1,105 +1,94 @@
-{% extends "base.html" %}{% block title %}Overview | FM-GDSS{% endblock %}
+{% extends "base.html" %}{% load static %}{% block title %}Overview | FM-GDSS{% endblock %}
 {% block content %}
-<section class="hero-panel reveal">
-    <div><span class="hero-kicker"><i class="bi bi-stars"></i> EARTH OBSERVATION <b>•</b> GIS <b>•</b> DECISION
-            SUPPORT</span>
-        <h1>{{ forest.name|default:"Forest" }} Intelligence</h1>
-        <p>Spatial assessment of forest condition, land-cover dynamics, ecological indicators, anthropogenic pressure
-            and management priorities.</p>
-        {% if forest %}
-        <div class="hero-meta"><span><i class="bi bi-geo-alt"></i> {{ forest.county|default:"Location not recorded" }},
-                {{ forest.country|default:"Kenya" }}</span><span><i class="bi bi-calendar3"></i> Analysis year {{
-                forest.profile.default_year|default:"Not configured" }}</span></div>
-        {% endif %}
+<div class="page-intro overview-intro">
+    <div><span class="muted-label">Forest Management Geospatial</span>
+        <h1>{{ forest.name|default:"Forest" }} | Spatial Overview</h1>
+        <p>Evidence-led forest monitoring and management: land-cover dynamics, ecological condition, anthropogenic
+            pressure and management priorities from validated research products.</p>
     </div>
-    <div class="hero-side-mark"><i class="bi bi-tree-fill"></i><span>OLOOLUA<br>FOREST</span></div>
-</section>
+    {% if forest %}<a class="btn btn-forest" href="/gis/?forest={{ forest.code }}">Open Web GIS <i
+            class="bi bi-arrow-up-right ms-1"></i></a>{% endif %}
+</div>
 {% if forest %}
-<div class="section-heading reveal reveal-delay-1">
-    <div><span class="muted-label">Current assessment</span>
-        <h2>Forest at a glance</h2>
-    </div>
-    <form class="forest-picker">
-        <label for="forest-select">Forest</label>
-        <select id="forest-select" name="forest" data-selected="{{ forest.code }}" onchange="this.form.submit()">
-            {% for f in forests %}
-            <option value="{{ f.code }}">{{ f.name }}</option>
-            {% endfor %}
-        </select>
-    </form>
+<div class="kpi-grid overview-kpis">
+    <article class="kpi-card reveal"><span class="muted-label">Forest Area</span><strong>{{ summary.area_display }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Analysis Period</span><strong>{{ period_display }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">LULC Epochs</span><strong>{{ epoch_count }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Map Products</span><strong>{{ summary.map_product_count }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Forest Change</span><strong>{{ forest_change_display }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Core Forest</span><strong>{{ core_forest_display }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Edge Forest</span><strong>{{ edge_forest_display }}</strong></article>
+    <article class="kpi-card reveal"><span class="muted-label">Management Zones</span><strong>{{ summary.management_zone_count }}</strong></article>
 </div>
-<div class="kpi-grid">
-    <article class="kpi-card reveal reveal-delay-1">
-        <div class="kpi-icon green"><i class="bi bi-bounding-box-circles"></i></div><span class="muted-label">Forest
-            area</span><strong>{{ forest.area_ha|default:"Not available" }}</strong><small>Geometry-derived area</small>
-    </article>
-    <article class="kpi-card reveal reveal-delay-2">
-        <div class="kpi-icon blue"><i class="bi bi-calendar2-range"></i></div><span class="muted-label">Analysis
-            horizon</span><strong>{{ forest.profile.default_year|default:"—" }}</strong><small>Profile
-            configuration</small>
-    </article>
-    <article class="kpi-card reveal reveal-delay-3">
-        <div class="kpi-icon amber"><i class="bi bi-layers"></i></div><span class="muted-label">Registered
-            products</span><strong>{{ forest.raster_layers.count }}</strong><small>Raster layers in catalogue</small>
-    </article>
-    <article class="kpi-card reveal reveal-delay-3">
-        <div class="kpi-icon violet"><i class="bi bi-diagram-3"></i></div><span class="muted-label">Management
-            zones</span><strong>{{ forest.management_zones.count }}</strong><small>Proposed analytical zones</small>
-    </article>
-</div>
-<div class="workspace-grid">
-    <section class="panel overview-map-card reveal reveal-delay-2">
+<div class="overview-grid">
+    <section class="panel overview-map-card reveal">
         <div class="panel-heading">
-            <div><span class="muted-label">Spatial intelligence</span>
-                <h3>Explore the forest landscape</h3>
-            </div><a class="text-action" href="/gis/">Open Web GIS <i class="bi bi-arrow-up-right"></i></a>
+            <div><span class="muted-label">{{ forest.name }} Boundary and Key Layers</span>
+                <h3>Spatial workspace</h3>
+            </div><a class="text-action" href="/gis/?forest={{ forest.code }}">Full Web GIS <i
+                    class="bi bi-arrow-up-right"></i></a>
         </div>
-        <div class="map-preview">
-            <div class="map-preview-grid"></div>
-            <div class="map-preview-center"><i class="bi bi-globe2"></i><strong>Interactive map
-                    workspace</strong><span>Boundary, layers and spatial products</span></div>
-            <div class="map-preview-scale">OLOOLUA · {{ forest.profile.default_year|default:"CURRENT" }}</div>
+        <div class="overview-map-wrap">
+            <div id="overview-map" class="overview-map"></div>
+            <div class="overview-map-controls" id="overviewMapControls"></div>
         </div>
     </section>
-    <section class="panel status-card reveal reveal-delay-3">
+    <section class="panel chart-panel reveal">
         <div class="panel-heading">
-            <div><span class="muted-label">Provenance</span>
-                <h3>Data availability</h3>
-            </div><i class="bi bi-info-circle status-info"></i>
+            <div><span class="muted-label">Land-cover composition</span>
+                <h3 id="compositionTitle">Land-cover composition | {{ analysis_year }}</h3>
+                <div id="compositionClasses" class="class-chip-row" aria-label="Configured land-cover classes"></div>
+            </div>
+            <select id="compositionYear" class="form-select form-select-sm chart-select"
+                aria-label="Composition year"></select>
         </div>
-        <div class="availability-list">
-            <div><span class="availability-dot available"></span><span>Forest configuration</span><b>Available</b></div>
-            <div><span class="availability-dot available"></span><span>Earth observation products</span><b>Catalogue
-                    status</b></div>
-            <div><span class="availability-dot available"></span><span>Management framework</span><b>Catalogue
-                    status</b></div>
-            <div><span class="availability-dot unavailable"></span><span>Species and field observations</span><b>Future
-                    data module</b></div>
-        </div>
-        <div class="status-note"><i class="bi bi-shield-check"></i><span>Only registered, validated datasets are
-                surfaced in this workspace. Missing scientific inputs are never replaced with estimates.</span></div>
+        <div class="chart chart-tall" id="compositionChart"></div>
+        <p id="compositionNote" class="chart-note" hidden></p>
     </section>
 </div>
-<div class="lower-grid">
-    <section class="panel workflow-card reveal">
+<div class="overview-grid lower">
+    <section class="panel chart-panel reveal">
         <div class="panel-heading">
-            <div><span class="muted-label">Analytical chain</span>
-                <h3>From observation to action</h3>
+            <div><span class="muted-label">Temporal composition</span>
+                <h3>LULC Area by Year</h3>
+            </div>
+            <div class="chart-toggle" role="group" aria-label="Area unit">
+                <button type="button" class="toggle-option is-active" data-unit="ha">ha</button><button type="button"
+                    class="toggle-option" data-unit="percent">%</button>
             </div>
         </div>
-        <div class="workflow-steps"><span><i class="bi bi-satellite"></i><b>Earth observation</b></span><i
-                class="bi bi-chevron-right"></i><span><i class="bi bi-layers"></i><b>Spatial analysis</b></span><i
-                class="bi bi-chevron-right"></i><span><i class="bi bi-shield-check"></i><b>Decision support</b></span><i
-                class="bi bi-chevron-right"></i><span><i class="bi bi-activity"></i><b>Monitoring</b></span></div>
+        <div class="chart" id="trendChart"></div>
     </section>
-    <section class="panel note-card reveal reveal-delay-1">
-        <div class="note-icon"><i class="bi bi-lightbulb"></i></div>
-        <div><span class="muted-label">Research note</span>
-            <p>Analytical indicators should be interpreted alongside their source metadata, spatial resolution and
-                stated methodological limitations.</p>
+    <section class="panel chart-panel reveal">
+        <div class="panel-heading">
+            <div><span class="muted-label">Land-cover flows</span>
+                <h3>LULC Transition Matrix</h3>
+            </div>
+            <div class="chart-toggle" role="group" aria-label="Matrix unit">
+                <button type="button" class="toggle-option is-active" data-matrix-unit="percent">%</button><button
+                    type="button" class="toggle-option" data-matrix-unit="ha">ha</button>
+            </div>
         </div>
+        <div class="chart" id="transitionChart"></div>
     </section>
 </div>
+<section class="panel status-card reveal">
+    <div class="panel-heading">
+        <div><span class="muted-label">Provenance</span>
+            <h3>Data Availability</h3>
+        </div><span class="data-badge derived"><i class="bi bi-info-circle"></i> Data provenance: Observed · Derived ·
+            Modelled · Proposed</span>
+    </div>
+    <div class="availability-list">
+        {% for label, available in data_status %}
+        <div>
+            <span class="availability-dot {% if available %}available{% else %}unavailable{% endif %}"></span>
+            <span class="availability-label">{{ label }}</span>
+            <b>{% if available %}Available{% else %}Awaiting data{% endif %}</b>
+        </div>
+        {% endfor %}
+    </div>
+</section>
 {% endif %}
 {% if not forest %}<section class="empty-state">
     <div class="empty-state-icon"><i class="bi bi-tree"></i></div><span class="muted-label">Workspace not
@@ -108,4 +97,19 @@
     <p>Run the Oloolua configuration command or create a forest record in Administration to begin.</p><a
         class="btn btn-forest" href="/admin/">Open administration</a>
 </section>{% endif %}
+{% endblock %}
+{% block head %}
+<script src="{% static 'vendor/echarts.min.js' %}"></script>{% endblock %}
+{% block extra_scripts %}
+{% if forest %}
+<script src="{% static 'vendor/ol.js' %}"></script>
+<script>
+    window.FGMDSS_FOREST_CODE = "{{ forest.code|default:'' }}";
+    window.FGMDSS_BASEMAPS = {{ basemaps_json | safe }};
+    window.FGMDSS_ANALYTICS_URL = "{{ analytics_url }}";
+    window.FGMDSS_TRANSITIONS_URL = "{{ transitions_url }}";
+</script>
+<script src="{% static 'js/overview-map.js' %}"></script>
+<script src="{% static 'js/overview.js' %}?v=20261027-1"></script>
+{% endif %}
 {% endblock %}

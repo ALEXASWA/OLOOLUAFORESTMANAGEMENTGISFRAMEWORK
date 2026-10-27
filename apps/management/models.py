@@ -43,3 +43,16 @@ class ManagementAction(models.Model):
     indicator = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
     geometry = models.GeometryField(srid=32737, null=True, blank=True)
+
+
+class ManagementZoneStatistic(models.Model):
+    forest = models.ForeignKey(Forest, on_delete=models.CASCADE, related_name="management_zone_statistics")
+    zone_code = models.CharField(max_length=80)
+    zone_name = models.CharField(max_length=180)
+    area_ha = models.FloatField()
+    percentage = models.FloatField()
+    source = models.CharField(max_length=1000)
+    version = models.CharField(max_length=50, default="gee-v1")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["forest", "zone_code", "version"], name="uniq_zone_stat_version")]

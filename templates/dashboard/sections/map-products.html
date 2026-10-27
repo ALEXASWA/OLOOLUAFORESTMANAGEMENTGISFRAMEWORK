@@ -1,0 +1,100 @@
+{% load static %}
+<section class="gallery-toolbar panel mp-toolbar reveal">
+    <div class="mp-toolbar-copy">
+        <span class="muted-label">Research products</span>
+        <h2>Oloolua map library</h2>
+        <p class="mp-lede">Published cartographic outputs from the registered Oloolua analysis. Open any map for a
+            full-resolution view or download the original file.</p>
+        <div class="mp-stat-row" aria-label="Collection summary">
+            <span><b id="mpStatMaps">&mdash;</b> maps</span>
+            <span><b id="mpStatEpochs">&mdash;</b> LULC epochs</span>
+            <span><b id="mpStatFormats">&mdash;</b> formats</span>
+        </div>
+    </div>
+    <div class="gallery-filters">
+        <label>Year<select id="product-year">
+                <option value="">All years</option>
+                <option>1990</option>
+                <option>2000</option>
+                <option>2010</option>
+                <option>2020</option>
+                <option>2025</option>
+            </select></label>
+        <label>Type<select id="product-type">
+                <option value="">All types</option>
+                <option value="lulc">LULC</option>
+                <option value="density">Forest density</option>
+                <option value="fragmentation">Fragmentation</option>
+                <option value="pressure">Human pressure</option>
+                <option value="management">Management zones</option>
+                <option value="rehabilitation">Rehabilitation</option>
+                <option value="methodology">Methodology</option>
+                <option value="qgis">QGIS project</option>
+            </select></label>
+        <label class="product-search">Search<input id="product-search" type="search"
+                placeholder="Search maps, years, themes" autocomplete="off"></label>
+    </div>
+</section>
+<div class="mp-filterbar">
+    <div id="product-chips" class="mp-chips" role="group" aria-label="Filter by product family"></div>
+    <span id="product-count" class="data-badge derived">Loading</span>
+</div>
+<section id="product-gallery" class="product-gallery" aria-live="polite" aria-busy="true">
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+    <article class="product-card is-skeleton" aria-hidden="true">
+        <div class="product-preview"></div>
+        <div class="product-body"><span class="skeleton-line short"></span><span class="skeleton-line"></span><span
+                class="skeleton-line"></span></div>
+    </article>
+</section>
+<section class="downloads-strip panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Project files</span>
+            <h2>QGIS projects and downloads</h2>
+        </div>
+    </div>
+    <div id="product-downloads" class="download-list"></div>
+</section>
+<div id="product-lightbox" class="product-lightbox" hidden aria-modal="true" role="dialog"
+    aria-labelledby="lightbox-title"><button class="lightbox-close" type="button" aria-label="Close viewer"><i
+            class="bi bi-x-lg"></i></button><button class="lightbox-prev" type="button"
+        aria-label="Previous product"><i class="bi bi-chevron-left"></i></button>
+    <div class="lightbox-stage"><img id="lightbox-image" alt="">
+        <div id="lightbox-loading" class="lightbox-loading" hidden><span class="lightbox-spinner"
+                aria-hidden="true"></span>Preparing map preview</div>
+        <div id="lightbox-empty" class="lightbox-empty" hidden>Preview unavailable for this file type.</div>
+    </div><button class="lightbox-next" type="button" aria-label="Next product"><i
+            class="bi bi-chevron-right"></i></button>
+    <aside class="lightbox-meta"><span id="lightbox-type" class="lightbox-type"></span>
+        <h2 id="lightbox-title"></h2>
+        <p id="lightbox-description"></p><a id="lightbox-download" class="btn btn-forest" href=""><i
+                class="bi bi-download me-2"></i>Download original</a><small class="lightbox-footnote">Registered Oloolua
+            map product &middot; preview only, not a georeferenced GIS layer.</small>
+    </aside>
+</div>
+<script>window.FGMDSS_PRODUCTS_URL = "/api/map-products/?forest={{ forest.code }}";</script>
+<script src="{% static 'js/map-products.js' %}?v=20261027-3"></script>

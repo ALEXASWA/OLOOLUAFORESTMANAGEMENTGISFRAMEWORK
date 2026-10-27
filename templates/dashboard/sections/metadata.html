@@ -1,0 +1,13 @@
+{% load static %}
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Registered records</span>
+            <h2>Dataset metadata</h2>
+        </div>
+    </div>
+    <div id="metadata-table" class="table-responsive">
+        <p class="loading-state">Loading records from the database...</p>
+    </div>
+</section>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ analytics_url }}"; window.FGMDSS_SECTION = "metadata";</script>
+<script src="{% static 'js/analytics.js' %}"></script>

@@ -10,8 +10,10 @@ class Forest(models.Model):
     management_authority = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)
     area_ha = models.FloatField(null=True, blank=True)
+    buffer_distance_m = models.PositiveIntegerField(default=100)
     status = models.CharField(max_length=20, choices=STATUS, default="active")
     geometry = models.MultiPolygonField(srid=32737, null=True, blank=True)
+    analytical_buffer = models.MultiPolygonField(srid=32737, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -38,6 +40,19 @@ class ForestProfile(models.Model):
     historical_years = models.JSONField(default=list, blank=True)
     crs = models.CharField(max_length=40, default="EPSG:32737")
     description = models.TextField(blank=True)
+    methodology_version = models.CharField(max_length=80, default="configurable-v1")
+    methodology_source = models.CharField(max_length=255, blank=True)
+    historical_sensor = models.CharField(max_length=120, blank=True)
+    current_sensor = models.CharField(max_length=120, blank=True)
+    historical_scale_m = models.PositiveIntegerField(null=True, blank=True)
+    current_scale_m = models.PositiveIntegerField(null=True, blank=True)
+    derived_scale_m = models.PositiveIntegerField(null=True, blank=True)
+    training_fraction = models.FloatField(null=True, blank=True)
+    validation_fraction = models.FloatField(null=True, blank=True)
+    validation_method = models.CharField(max_length=255, blank=True)
+    random_seed = models.IntegerField(null=True, blank=True)
+    class_schema = models.JSONField(default=dict, blank=True)
+    methodology = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"Profile: {self.forest.name}"

@@ -1,0 +1,24 @@
+{% if field_observation_count %}
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Field programme</span>
+            <h2>Registered field observations</h2>
+        </div><a class="text-action" href="{% url 'field-data' %}{% if forest %}?forest={{ forest.code }}{% endif %}">Open
+            Field Data <i class="bi bi-arrow-up-right"></i></a>
+    </div>
+    <div class="analytics-strip">
+        <div><span class="muted-label">Observations</span><strong>{{ field_observation_count }}</strong><small>records
+                registered</small></div>
+    </div>
+    <p class="methodology-panel">Observation records are managed in the Field Data module with date, observer, type,
+        severity and location metadata.</p>
+</section>
+{% else %}
+<section class="panel empty-state">
+    <div class="empty-state-icon"><i class="bi bi-broadcast-pin"></i></div><span class="muted-label">Awaiting field
+        data</span>
+    <h2>AWAITING FIELD DATA</h2>
+    <p>No field observations are currently registered. Future field observation records can be imported through the
+        Field Data module with dates, observer, location, observation type, severity, and source metadata.</p>
+</section>
+{% endif %}

@@ -1,0 +1,62 @@
+{% load static %}
+<div class="section-data-grid">
+    <section class="panel chart-panel">
+        <div class="panel-heading">
+            <div><span class="muted-label">Derived structure</span>
+                <h2>Core versus edge forest</h2>
+            </div>
+        </div>
+        <div class="chart" data-chart="ecology-core-edge"></div>
+    </section>
+    <section class="panel analytics-workspace">
+        <div class="panel-heading">
+            <div><span class="muted-label">NDVI 2025</span>
+                <h2>Vegetation condition statistics</h2>
+            </div>
+        </div>
+        <table class="professional-table">
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>{% for row in ndvi_rows %}<tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.value_display }}</td>
+                    <td>Derived</td>
+                </tr>{% empty %}<tr>
+                    <td colspan="3">NDVI_2025_Descriptive_Statistics.csv is awaiting import.</td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </section>
+</div>
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Available spatial products</span>
+            <h2>Ecology layers</h2>
+        </div>
+    </div>
+    <table class="professional-table">
+        <thead>
+            <tr>
+                <th>Dataset</th>
+                <th>Year</th>
+                <th>Resolution</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>{% for layer in ecology_layers %}<tr>
+                <td>{{ layer.name }}</td>
+                <td>{{ layer.year|default:"-" }}</td>
+                <td>{{ layer.resolution_m|default:"-" }} m</td>
+                <td>Derived</td>
+            </tr>{% empty %}<tr>
+                <td colspan="4">No ecology raster layers are registered.</td>
+            </tr>{% endfor %}</tbody>
+    </table>
+</section>
+<script src="{% static 'vendor/echarts.min.js' %}"></script>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ section_api_url }}"; window.FGMDSS_SECTION = "ecology";</script>
+<script src="{% static 'js/analytics.js' %}"></script>

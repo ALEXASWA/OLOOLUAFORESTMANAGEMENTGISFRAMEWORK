@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Field Data | FM-GDSS{% endblock %}
+{% block content %}
+<div class="page-intro">
+    <div><span class="muted-label">Ground reference</span>
+        <h1>Field Data</h1>
+        <p>Field observations collected within the forest workspace. Field records are observed data and are kept
+            distinct from remote-sensing derivatives.</p>
+    </div>{% if forest %}<span class="data-badge observed"><i class="bi bi-tree"></i> {{ forest.name }}</span>{% endif %}
+</div>
+{% if forest %}
+<section class="panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Observed records</span>
+            <h2>Field observations</h2>
+        </div><span class="count-pill">{{ observation_count }} registered</span>
+    </div>
+    {% if observations %}
+    <div class="table-responsive">
+        <table class="professional-table">
+            <thead>
+                <tr>
+                    <th>Observed at</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Observer</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>{% for observation in observations %}<tr>
+                    <td>{{ observation.observed_at|date:"Y-m-d H:i"|default:"Not recorded" }}</td>
+                    <td>{{ observation.observation_type|default:"Not recorded" }}</td>
+                    <td>{{ observation.severity|default:"—" }}</td>
+                    <td>{{ observation.observer.username|default:"Not recorded" }}</td>
+                    <td>{{ observation.description|default:"Not recorded" }}</td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-empty"><i class="bi bi-clipboard2-pulse"></i><strong>Awaiting field observations</strong>
+        <span>No field observation has been registered for this forest. Field records are entered as
+            <code>FieldObservation</code> records through Django Administration or a validated field-data import
+            workflow; no field data is fabricated or inferred from remote-sensing products.</span>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% if not forest %}<section class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-tree"></i></div><span class="muted-label">Workspace not
+        configured</span>
+    <h2>No active forest is registered</h2>
+    <p>Configure a forest before registering field observations.</p><a class="btn btn-forest" href="/admin/">Open
+        administration</a>
+</section>{% endif %}
+{% endblock %}

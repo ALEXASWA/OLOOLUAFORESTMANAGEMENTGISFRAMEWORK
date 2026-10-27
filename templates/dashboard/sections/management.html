@@ -1,0 +1,40 @@
+{% load static %}
+<section class="panel chart-panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Proposed Analytical Management Zone</span>
+            <h2>Zone distribution</h2>
+        </div>
+    </div>
+    <div class="chart" data-chart="management"></div>
+</section>
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Management_Zone_Areas.csv</span>
+            <h2>Planning priorities</h2>
+        </div>
+    </div>
+    <table class="professional-table">
+        <thead>
+            <tr>
+                <th>Zone</th>
+                <th>Area</th>
+                <th>Share</th>
+                <th>Purpose</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>{% for zone in management_zones %}<tr>
+                <td>{{ zone.zone_name }}</td>
+                <td>{{ zone.area_display }}</td>
+                <td>{{ zone.percentage_display }}</td>
+                <td>Analytical planning priority</td>
+                <td>Monitor and manage according to the supplied framework</td>
+            </tr>{% empty %}<tr>
+                <td colspan="5">Management_Zone_Areas.csv is awaiting import.</td>
+            </tr>{% endfor %}</tbody>
+    </table>
+    <p class="methodology-panel">These are proposed analytical management zones, not legally gazetted zones.</p>
+</section>
+<script src="{% static 'vendor/echarts.min.js' %}"></script>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ section_api_url }}"; window.FGMDSS_SECTION = "management";</script>
+<script src="{% static 'js/analytics.js' %}"></script>

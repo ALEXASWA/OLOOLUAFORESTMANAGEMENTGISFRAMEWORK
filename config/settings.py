@@ -9,6 +9,39 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()]
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+BASEMAPS = {
+    "osm": {
+        "label": "OpenStreetMap",
+        "url": os.getenv("BASEMAP_OSM_URL", "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
+        "attribution": "© OpenStreetMap contributors",
+        "max_zoom": 19,
+    },
+    "light": {
+        "label": "Light neutral",
+        "url": os.getenv("BASEMAP_LIGHT_URL", "https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
+        "attribution": "© OpenStreetMap contributors © CARTO",
+        "max_zoom": 20,
+    },
+    "satellite": {
+        "label": "Satellite",
+        "url": os.getenv("BASEMAP_SATELLITE_URL", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"),
+        "attribution": "Tiles © Esri, Maxar, Earthstar Geographics",
+        "max_zoom": 19,
+    },
+    "terrain": {
+        "label": "Terrain",
+        "url": os.getenv("BASEMAP_TERRAIN_URL", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"),
+        "attribution": "Tiles © Esri — Esri, HERE, Garmin, FAO, NOAA, USGS",
+        "max_zoom": 19,
+    },
+    "dark": {
+        "label": "Dark",
+        "url": os.getenv("BASEMAP_DARK_URL", "https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"),
+        "attribution": "© OpenStreetMap contributors © CARTO",
+        "max_zoom": 20,
+    },
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
@@ -18,6 +51,7 @@ INSTALLED_APPS = [
     "apps.forests", "apps.gis_layers", "apps.lulc", "apps.change_detection",
     "apps.ecology", "apps.threats", "apps.biodiversity", "apps.field_data",
     "apps.management", "apps.monitoring", "apps.dashboard", "apps.api",
+    "apps.training_data",
 ]
 
 MIDDLEWARE = [
@@ -39,6 +73,7 @@ TEMPLATES = [{
         "django.template.context_processors.request",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
+           "apps.forests.context_processors.active_forest",
     ]},
 }]
 WSGI_APPLICATION = "config.wsgi.application"
@@ -93,6 +128,9 @@ REST_FRAMEWORK = {
 # GDAL/GEOS can be overridden in .env. The fallback supports the bundled
 # Windows wheels used by the project's active virtual environment.
 _osgeo_dir = Path(sys.prefix) / "Lib" / "site-packages" / "osgeo"
+_pyproj_data_dir = Path(sys.prefix) / "Lib" / "site-packages" / "pyproj" / "proj_dir" / "share" / "proj"
+if _pyproj_data_dir.exists():
+    os.environ.setdefault("PROJ_LIB", str(_pyproj_data_dir))
 GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH") or (
     str(_osgeo_dir / "gdal.dll") if (_osgeo_dir / "gdal.dll").exists() else None
 )

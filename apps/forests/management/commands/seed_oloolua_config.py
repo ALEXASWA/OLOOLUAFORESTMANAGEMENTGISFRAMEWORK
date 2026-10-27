@@ -25,9 +25,34 @@ class Command(BaseCommand):
                 "default_year": 2025,
                 "historical_years": [1990,2000,2010,2020,2025],
                 "crs": "EPSG:32737",
+                "methodology_version": "oloolua-gee-v1.0",
+                "methodology_source": "Google Earth Engine Oloolua Sustainable Forest Ecosystem Analysis",
+                "historical_sensor": "Landsat historical composites",
+                "current_sensor": "Sentinel-2 SR Harmonized",
+                "historical_scale_m": 30,
+                "current_scale_m": 10,
+                "derived_scale_m": 30,
+                "training_fraction": 0.70,
+                "validation_fraction": 0.30,
+                "validation_method": "Polygon-level random split; reference polygons, not historical field observations",
+                "random_seed": 42,
+                "class_schema": {"1": "Forest", "2": "Grassland", "3": "Quarry", "4": "Built-up"},
+                "methodology": {
+                    "buffer_distance_m": 100,
+                    "water_class": "excluded",
+                    "ndvi_interpretation": "vegetation condition indicator, not a direct health measure",
+                    "human_pressure_interpretation": "remotely detectable spatial proxy, not proof of causation",
+                    "management_zone_status": "proposed analytical decision-support zones",
+                    "epochs": [1990, 2000, 2010, 2020, 2025],
+                    "derived_products": [
+                        "LULC transitions", "forest loss/gain", "built-up/quarry expansion",
+                        "NDVI condition and change", "forest density", "fragmentation", "edge/core",
+                        "human pressure", "conservation priority", "rehabilitation priority", "management zones",
+                    ],
+                },
             },
         )
-        classes = [(1,"Forest"),(2,"Grassland"),(3,"Quarry"),(4,"Built-up"),(5,"Water")]
+        classes = [(1,"Forest"),(2,"Grassland"),(3,"Quarry"),(4,"Built-up")]
         for code,name in classes:
             LULCClass.objects.get_or_create(forest=forest, code=code, defaults={"name":name,"display_order":code})
         zones = [

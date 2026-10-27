@@ -1,20 +1,19 @@
-{% extends "base.html" %}{% block title %}LULC & Change | FM-GDSS{% endblock %}
+{% extends "base.html" %}{% load static %}{% block title %}LULC & Change | FM-GDSS{% endblock %}
 {% block content %}
 <div class="page-intro">
     <div><span class="muted-label">Land-cover dynamics</span>
         <h1>Land Use / Land Cover</h1>
         <p>Multi-temporal assessment of landscape composition and change for registered forest products.</p>
-    </div><span class="data-badge derived"><i class="bi bi-diagram-3"></i> {{ forest.name|default:"Forest workspace"
-        }}</span>
+    </div><span class="data-badge derived"><i class="bi bi-diagram-3"></i> {{ forest_name }}</span>
 </div>
 {% if forest %}
 <div class="analytics-strip">
-    <div><span class="muted-label">Registered years</span><strong>{{ maps.count }}</strong><small>dataset{{
-            maps.count|pluralize }}</small></div>
-    <div><span class="muted-label">Classification</span><strong>{{ forest.lulc_classes.count|default:"—"
-            }}</strong><small>configured class{{ forest.lulc_classes.count|pluralize }}</small></div>
-    <div><span class="muted-label">Data status</span><strong class="status-text">{{ maps.count|yesno:"Available,Not
-            available" }}</strong><small>validated catalogue records</small></div>
+    <div><span class="muted-label">Registered years</span><strong>{{ map_count }}</strong><small>datasets</small></div>
+    <div><span class="muted-label">Classification</span><strong>{{ class_count }}</strong><small>configured
+            classes</small></div>
+    <div><span class="muted-label">Registered products</span><strong>{{ summary.registered_product_count }}</strong><small>raster and map catalogue</small></div>
+    <div><span class="muted-label">Data status</span><strong class="status-text">
+            {{ data_status }}</strong><small>validated catalogue records</small></div>
 </div>
 <section class="panel analytics-workspace">
     <div class="panel-heading">
@@ -51,10 +50,38 @@
         </table>
     </div>
 </section>
+<section class="panel class-registry reveal">
+    <div class="panel-heading">
+        <div><span class="muted-label">Class registry</span>
+            <h2>Configured classes and epoch coverage</h2>
+        </div><span id="lulcCoverageBadge" class="data-badge derived">Loading</span>
+    </div>
+    <div id="lulcClassCoverage" class="class-coverage" aria-live="polite"></div>
+</section>
+<section class="panel chart-panel reveal">
+    <div class="panel-heading">
+        <div><span class="muted-label">Imported statistics</span>
+            <h2>LULC area by year</h2>
+        </div>
+    </div>
+    <div class="chart" data-chart="lulc"></div>
+</section>
+<section class="panel chart-panel reveal">
+    <div class="panel-heading">
+        <div><span class="muted-label">Imported change records</span>
+            <h2>Transition matrix</h2>
+        </div>
+        <div class="chart-toggle" role="group" aria-label="Transition units"><button type="button"
+                class="toggle-option is-active" data-matrix-unit="percent">%</button><button type="button"
+                class="toggle-option" data-matrix-unit="ha">ha</button></div>
+    </div>
+    <div class="chart" data-chart="lulc-transitions"></div>
+</section>
 <div class="methodology-panel"><i class="bi bi-shield-check"></i>
     <div><span class="muted-label">Interpretation note</span>
-        <p>Class areas, transitions and accuracy statements should be read from the imported dataset metadata. This page
-            does not infer statistics where source records are absent.</p>
+        <p>Class areas, transitions and accuracy statements should be read from the imported dataset metadata. Classes
+            configured in the registry but absent from an epoch's imported statistics are shown as “not recorded”, never
+            as zero. This page does not infer statistics where source records are absent.</p>
     </div>
 </div>
 {% endif %}
@@ -66,3 +93,8 @@
         href="/admin/">Open administration</a>
 </section>{% endif %}
 {% endblock %}
+{% block head %}
+<script src="{% static 'vendor/echarts.min.js' %}"></script>{% endblock %}
+{% block extra_scripts %}
+<script>window.FGMDSS_ANALYTICS_URL = "{{ analytics_url }}"; window.FGMDSS_TRANSITIONS_URL = "{{ transitions_url }}"; window.FGMDSS_SECTION = "lulc";</script>
+<script src="{% static 'js/analytics.js' %}?v=20261027-1"></script>{% endblock %}

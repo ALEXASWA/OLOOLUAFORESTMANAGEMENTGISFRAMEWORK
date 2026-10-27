@@ -5,25 +5,25 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}FGMDSS{% endblock %}</title>
+    <title>{% block title %}FM-GDSS{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
         rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.2.1/ol.css">
-    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link href="{% static 'vendor/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/ol.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}?v=20261027-6">
     {% block head %}{% endblock %}
 </head>
 
-<body class="app-body">
+<body class="app-body {% block body_class %}{% endblock %}">
     <div class="app-shell">
         <aside class="app-sidebar" id="appSidebar">
             <div class="brand-lockup">
                 <div class="brand-mark"><i class="bi bi-tree-fill"></i></div>
-                <div><strong>FM-GDSS</strong><span>Forest intelligence</span></div>
+                <div><strong>FM-GDSS</strong><span>Forest Management Geospatial<br>Decision Support System</span></div>
             </div>
             <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Collapse navigation"><i
                     class="bi bi-layout-sidebar-inset"></i></button>
@@ -35,32 +35,59 @@
                         class="bi bi-globe2"></i><span>Web GIS</span></a>
                 <a class="nav-link {% if '/lulc/' in request.path %}is-active{% endif %}" href="/lulc/"><i
                         class="bi bi-layers-half"></i><span>LULC &amp; Change</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-tree"></i><span>Forest Ecology</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-activity"></i><span>Anthropogenic Pressure</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-shield-check"></i><span>Conservation Priority</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-diagram-3"></i><span>Management Zones</span></a>
+                <a class="nav-link {% if '/ecology/' in request.path %}is-active{% endif %}" href="/ecology/"><i
+                        class="bi bi-tree"></i><span>Forest Ecology</span></a>
+                <a class="nav-link {% if '/pressure/' in request.path %}is-active{% endif %}" href="/pressure/"><i
+                        class="bi bi-activity"></i><span>Anthropogenic Pressure</span></a>
+                <a class="nav-link {% if '/conservation/' in request.path %}is-active{% endif %}"
+                    href="/conservation/"><i class="bi bi-shield-check"></i><span>Conservation Priority</span></a>
+                <a class="nav-link {% if '/management/' in request.path %}is-active{% endif %}" href="/management/"><i
+                        class="bi bi-diagram-3"></i><span>Management Zones</span></a>
+                <a class="nav-link {% if '/map-products/' in request.path %}is-active{% endif %}"
+                    href="/map-products/"><i class="bi bi-images"></i><span>Map Products</span></a>
+                <a class="nav-link {% if '/metadata/' in request.path %}is-active{% endif %}" href="/metadata/"><i
+                        class="bi bi-database"></i><span>Data &amp; Metadata</span></a>
                 <span class="nav-label nav-label-spaced">Operations</span>
-                <a class="nav-link" href="/"><i class="bi bi-broadcast-pin"></i><span>Monitoring</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-images"></i><span>Map Products</span></a>
-                <a class="nav-link" href="/"><i class="bi bi-database"></i><span>Data &amp; Metadata</span></a>
-                <a class="nav-link" href="/admin/"><i class="bi bi-sliders2"></i><span>Administration</span></a>
+                {% if can_view_training %}<a class="nav-link {% if '/training/' in request.path %}is-active{% endif %}"
+                    href="/training/"><i class="bi bi-bezier2"></i><span>Training Data</span></a>{% endif %}
+                <a class="nav-link {% if '/imports/' in request.path %}is-active{% endif %}" href="/imports/"><i
+                        class="bi bi-box-arrow-in-down"></i><span>Data Imports</span></a>
+                {% if can_view_operations %}<a class="nav-link {% if '/monitoring/' in request.path %}is-active{% endif %}"
+                    href="/monitoring/"><i class="bi bi-broadcast-pin"></i><span>Monitoring</span></a>
+                <a class="nav-link {% if '/field-data/' in request.path %}is-active{% endif %}" href="/field-data/"><i
+                        class="bi bi-clipboard2-pulse"></i><span>Field Data</span></a>{% endif %}
+                <a class="nav-link {% if '/reports/' in request.path %}is-active{% endif %}" href="/reports/"><i
+                        class="bi bi-file-earmark-text"></i><span>Reports</span></a>
+                {% if can_view_admin %}<a class="nav-link" href="/admin/"><i
+                        class="bi bi-sliders2"></i><span>Administration</span></a>{% endif %}
             </nav>
-            <div class="sidebar-footer"><i class="bi bi-shield-check"></i><span>Research-grade spatial decision
-                    support</span></div>
+            <div class="sidebar-footer"><i class="bi bi-shield-check"></i><span>Research-based insights<br>for
+                    sustainable forest management</span></div>
         </aside>
         <div class="app-main">
             <header class="topbar">
                 <button class="mobile-menu" type="button" data-sidebar-toggle aria-label="Open navigation"><i
                         class="bi bi-list"></i></button>
-                <div class="topbar-context"><span class="eyebrow">FOREST MANAGEMENT GEOSPATIAL</span><span
-                        class="topbar-title">Decision Support System</span></div>
+                <div class="topbar-context"><span class="brand-mark sm"><i class="bi bi-tree-fill"></i></span>
+                    <div><span class="eyebrow">FOREST MANAGEMENT GEOSPATIAL</span><span class="topbar-title">Decision
+                            Support System</span></div>
+                </div>
                 <div class="topbar-actions">
-                    <div class="topbar-select"><i class="bi bi-tree"></i><span>Oloolua Forest</span><i
-                            class="bi bi-chevron-down"></i></div>
-                    <div class="connection-status"><span class="status-dot"></span><span>Data connected</span></div>
+                    <label class="topbar-select"><i class="bi bi-tree"></i><select id="global-forest-select"
+                            data-selected="{{ active_forest.code|default:'' }}" aria-label="Selected forest">
+                            {% for forest_option in active_forests %}
+                            <option value="{{ forest_option.code }}">{{ forest_option.name }}</option>
+                            {% endfor %}
+                        </select><i class="bi bi-chevron-down"></i></label>
+                    <div class="connection-status" id="connectionStatus" data-checking><span
+                            class="status-dot pending"></span><span>Checking…</span></div>
                     {% if user.is_authenticated %}
                     <div class="user-chip"><span>{{ user.username|first|upper }}</span>
-                        <div><strong>{{ user.username }}</strong><small>Authenticated user</small></div>
+                        <div><strong>{{ user.username }}</strong><small>{% for g in user.groups.all %}{{ g.name }}
+                                {% empty %}Authenticated user{% endfor %}</small></div>
+                        <form method="post" action="/accounts/logout/" class="logout-form">{% csrf_token %}<button
+                                type="submit" class="logout-button" title="Sign out"><i
+                                    class="bi bi-box-arrow-right"></i></button></form>
                     </div>
                     {% endif %}
                     {% if not user.is_authenticated %}
@@ -69,8 +96,10 @@
                 </div>
             </header>
             <main class="page-content">{% block content %}{% endblock %}</main>
-            <footer class="app-footer"><span>FM-GDSS</span><span>Oloolua Forest · Nairobi Metropolitan Area,
-                    Kenya</span><span>Analysis framework v1.0</span></footer>
+            <footer class="app-footer"><span>FM-GDSS</span><span>{{ active_forest.name|default:"Forest workspace" }} ·
+                    {{ active_forest.county|default:"Location not recorded" }},
+                    {{ active_forest.country|default:"Country not recorded" }}</span><span>Analysis framework
+                    v1.0</span></footer>
         </div>
     </div>
     <script>
@@ -80,7 +109,32 @@
                 document.getElementById('appSidebar').classList.toggle('is-open');
             });
         });
+        const globalForestSelect = document.getElementById('global-forest-select');
+        if (globalForestSelect?.dataset.selected) globalForestSelect.value = globalForestSelect.dataset.selected;
+        globalForestSelect?.addEventListener('change', function () {
+            const url = new URL(window.location.href);
+            url.searchParams.set('forest', this.value);
+            window.location.href = url.toString();
+        });
+        (function checkHealth() {
+            const status = document.getElementById('connectionStatus');
+            if (!status) return;
+            fetch('/api/health/').then(function (response) {
+                if (!response.ok) throw new Error('unhealthy');
+                return response.json();
+            }).then(function (data) {
+                status.removeAttribute('data-checking');
+                status.innerHTML = '<span class="status-dot"></span><span>Data connected</span>';
+                status.title = 'PostgreSQL/PostGIS reachable (PostGIS ' + (data.postgis || 'unknown') + ')';
+            }).catch(function () {
+                status.removeAttribute('data-checking');
+                status.classList.add('is-error');
+                status.innerHTML = '<span class="status-dot error"></span><span>Connection issue</span>';
+                status.title = 'The database/API health check failed';
+            });
+        })();
     </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 
 </html>

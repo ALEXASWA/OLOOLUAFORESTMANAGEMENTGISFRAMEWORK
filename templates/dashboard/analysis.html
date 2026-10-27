@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ page_title }} | FM-GDSS{% endblock %}
+{% block content %}
+<div class="page-intro reveal">
+    <div><span class="muted-label">{{ eyebrow }}</span>
+        <h1>{{ page_title }}</h1>
+        <p>{{ description }}</p>
+    </div>{% if forest %}<span class="data-badge derived"><i class="bi bi-tree"></i> {{ forest.name }}</span>{% endif %}
+</div>
+{% if forest %}
+<div class="analytics-strip reveal">
+    <div><span class="muted-label">Forest area</span><strong>{{ area_display }}</strong><small>geometry-derived</small>
+    </div>
+    <div><span class="muted-label">Analysis year</span><strong>{{ analysis_year_display }}</strong><small>profile
+            configuration</small></div>
+    <div><span class="muted-label">Registered products</span><strong>{{ product_count_display }}</strong><small>raster
+            and map catalogue</small></div>
+</div>
+{% include section_template %}
+{% else %}<section class="empty-state">
+    <h2>No active forest is registered</h2>
+    <p>Configure a forest before viewing analytical outputs.</p>
+</section>{% endif %}
+{% endblock %}

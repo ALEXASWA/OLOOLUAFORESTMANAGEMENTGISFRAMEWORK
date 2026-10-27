@@ -1,57 +1,179 @@
 {% extends "base.html" %}{% load static %}{% block title %}Web GIS | FM-GDSS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'css/gis-workspace.css' %}?v=20261027-8">{% endblock %}
+{% block body_class %}gis-immersive{% endblock %}
 {% block content %}
-<div class="page-intro">
-    <div><span class="muted-label">Spatial intelligence</span>
-        <h1>Web GIS workspace</h1>
-        <p>Explore registered forest boundaries and spatial products with a focused map-first interface.</p>
-    </div><span class="data-badge derived"><i class="bi bi-database-check"></i> Registered data only</span>
+<div class="gis-app" id="gisApp" data-theme="light">
+    <header class="gis-head">
+        <div class="gis-head-left">
+            <button class="gis-icon-btn" id="panelToggle" type="button" aria-expanded="true" aria-controls="gisPanel" title="Toggle layer panel" aria-label="Toggle layer panel"><i class="bi bi-layout-sidebar-inset"></i></button>
+            <div class="gis-head-title">
+                <span class="gis-kicker">Spatial intelligence</span>
+                <h1>Web GIS workspace</h1>
+            </div>
+            <span class="gis-forest-chip" title="{{ forest.name|default:'No forest selected' }}">
+                <i class="bi bi-tree-fill"></i>
+                <span>{{ forest.name|default:"No forest selected" }}</span>
+                <small>{{ summary.area_display|default:"" }}</small>
+            </span>
+        </div>
+        <div class="gis-head-right">
+            <span class="gis-data-badge"><i class="bi bi-database-check"></i> Registered data only</span>
+            <button class="gis-icon-btn" id="insightsToggle" type="button" aria-expanded="true" aria-controls="insightsPanel" title="Toggle insights panel" aria-label="Toggle insights panel"><i class="bi bi-graph-up-arrow"></i></button>
+            <button class="gis-icon-btn" id="themeToggle" type="button" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+        </div>
+    </header>
+    <div class="gis-body">
+        <aside class="gis-panel" id="gisPanel" aria-label="Map layers">
+            <div class="gis-panel-head">
+                <div class="gis-panel-heading">
+                    <span class="gis-panel-kicker">Layers</span>
+                    <strong>Map layers</strong>
+                </div>
+                <div class="gis-panel-tools">
+                    <button class="gis-mini-btn" id="expandAll" type="button" title="Expand all groups" aria-label="Expand all layer groups"><i class="bi bi-arrows-expand"></i></button>
+                    <button class="gis-mini-btn" id="collapseAll" type="button" title="Collapse all groups" aria-label="Collapse all layer groups"><i class="bi bi-arrows-collapse"></i></button>
+                    <button class="gis-mini-btn" id="panelCollapse" type="button" title="Hide layer panel" aria-label="Hide layer panel"><i class="bi bi-chevron-double-left"></i></button>
+                </div>
+            </div>
+            <div class="gis-panel-controls">
+                <label class="gis-field" for="forestSelect"><span>Forest</span></label>
+                <select id="forestSelect" class="gis-select" data-selected="{{ forest.code }}">
+                    {% for f in forests %}<option value="{{ f.code }}">{{ f.name }}</option>{% endfor %}
+                </select>
+                <label class="gis-search" for="layerSearch"><i class="bi bi-search"></i>
+                    <input id="layerSearch" type="search" placeholder="Filter layers by name" autocomplete="off" aria-label="Filter layers by name">
+                </label>
+            </div>
+            <div class="gis-panel-scroll" id="layerPanel" aria-live="polite" aria-busy="true">
+                <div class="gis-skeleton" aria-hidden="true">
+                    <span class="gis-sk gis-sk-head"></span>
+                    <span class="gis-sk"></span><span class="gis-sk"></span><span class="gis-sk"></span>
+                    <span class="gis-sk gis-sk-head"></span>
+                    <span class="gis-sk"></span><span class="gis-sk"></span><span class="gis-sk"></span>
+                </div>
+            </div>
+            <div class="gis-panel-foot" aria-label="Data status key">
+                <span><i class="gis-key observed"></i>Observed</span>
+                <span><i class="gis-key derived"></i>Derived</span>
+                <span><i class="gis-key modelled"></i>Modelled</span>
+                <span><i class="gis-key proposed"></i>Proposed</span>
+            </div>
+        </aside>
+        <div class="gis-stage" id="gisStage">
+            <div class="gis-map-shell" id="mapShell">
+                <div id="map" class="gis-map" role="application" aria-label="Interactive forest map"></div>
+                <div id="mapB" class="gis-map gis-map-b" hidden aria-hidden="true"></div>
+                <div class="gis-pane-label gis-pane-label-a" id="paneLabelA" hidden><span>A</span><b id="paneYearA">2025</b></div>
+                <div class="gis-pane-label gis-pane-label-b" id="paneLabelB" hidden><span>B</span><b id="paneYearB">1990</b></div>
+                <div class="gis-swipe" id="swipeHandle" hidden>
+                    <div class="gis-swipe-line"></div>
+                    <button class="gis-swipe-grip" type="button" aria-label="Drag to compare years"><i class="bi bi-arrows-expand-vertical"></i><span>Drag</span></button>
+                </div>
+            </div>
+            <div class="gis-toolbar" role="toolbar" aria-label="Map controls" aria-orientation="vertical">
+                <div class="gis-tool-group">
+                    <button class="gis-tool" id="zoomIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+                    <button class="gis-tool" id="zoomOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+                    <button class="gis-tool" id="zoomToForest" type="button" title="Reset to forest extent" aria-label="Reset to forest extent"><i class="bi bi-crosshair"></i></button>
+                    <button class="gis-tool" id="locateMe" type="button" title="Locate me" aria-label="Locate me"><i class="bi bi-geo-alt"></i></button>
+                </div>
+                <div class="gis-tool-group">
+                    <button class="gis-tool" id="identifyToggle" type="button" title="Identify raster values" aria-label="Identify raster values" aria-pressed="false"><i class="bi bi-cursor"></i></button>
+                    <button class="gis-tool" id="measureLine" type="button" title="Measure distance" aria-label="Measure distance" aria-pressed="false"><i class="bi bi-rulers"></i></button>
+                    <button class="gis-tool" id="measureArea" type="button" title="Measure area" aria-label="Measure area" aria-pressed="false"><i class="bi bi-bounding-box"></i></button>
+                    <button class="gis-tool" id="drawToggle" type="button" title="Draw polygon" aria-label="Draw polygon" aria-pressed="false"><i class="bi bi-pencil-square"></i></button>
+                    <button class="gis-tool" id="clearMeasure" type="button" title="Clear measurement and drawings" aria-label="Clear measurement and drawings" hidden><i class="bi bi-eraser"></i></button>
+                </div>
+                <div class="gis-tool-group">
+                    <button class="gis-tool" id="basemapToggle" type="button" title="Basemap" aria-label="Choose basemap" aria-expanded="false"><i class="bi bi-map"></i></button>
+                    <button class="gis-tool" id="exportToggle" type="button" title="Export" aria-label="Export map" aria-expanded="false"><i class="bi bi-download"></i></button>
+                    <button class="gis-tool" id="fullscreenToggle" type="button" title="Fullscreen" aria-label="Toggle fullscreen"><i class="bi bi-fullscreen"></i></button>
+                </div>
+                <div class="gis-popmenu gis-basemap-menu" id="basemapMenu" hidden role="menu" aria-label="Basemaps"></div>
+                <div class="gis-popmenu gis-export-menu" id="exportMenu" hidden role="menu" aria-label="Export options">
+                    <span class="gis-popmenu-title">Export map</span>
+                    <button type="button" data-export="png" role="menuitem"><i class="bi bi-file-earmark-image"></i><span><strong>PNG image</strong><small>Map, legend, scale and title</small></span></button>
+                    <button type="button" data-export="pdf" role="menuitem"><i class="bi bi-file-earmark-pdf"></i><span><strong>PDF / print</strong><small>Composed layout via print dialog</small></span></button>
+                </div>
+            </div>
+            <div class="gis-rail">
+                <section class="gis-legend" id="legendPanel" aria-label="Map legend">
+                    <div class="gis-legend-head" id="legendDrag">
+                        <i class="bi bi-grip-vertical gis-drag-grip" aria-hidden="true"></i>
+                        <span>Legend</span>
+                        <small id="legendCount">0 active</small>
+                        <button class="gis-mini-btn" id="legendPrint" type="button" title="Print map with legend" aria-label="Print map with legend"><i class="bi bi-printer"></i></button>
+                        <button class="gis-mini-btn" id="legendCollapse" type="button" title="Collapse legend" aria-label="Collapse legend" aria-expanded="true"><i class="bi bi-dash-lg"></i></button>
+                    </div>
+                    <div class="gis-legend-body" id="legendBody"></div>
+                </section>
+                <section class="gis-insights" id="insightsPanel" aria-label="Live insights">
+                    <div class="gis-insights-head">
+                        <div>
+                            <span class="gis-panel-kicker">Live insights</span>
+                            <strong id="insightsTitle">Landscape summary</strong>
+                        </div>
+                        <button class="gis-mini-btn" id="insightsCollapse" type="button" title="Collapse insights" aria-label="Collapse insights" aria-expanded="true"><i class="bi bi-dash-lg"></i></button>
+                    </div>
+                    <div class="gis-insights-body">
+                        <div class="gis-kpis" id="insightKpis"></div>
+                        <div class="gis-chart" id="insightDonut" role="img" aria-label="Land use and land cover composition chart"></div>
+                        <div class="gis-chart" id="insightTrend" role="img" aria-label="Forest cover trend chart"></div>
+                        <div class="gis-chart" id="insightChange" role="img" aria-label="Forest gain, loss and persistent area chart"></div>
+                        <p class="gis-insight-note"><i class="bi bi-info-circle"></i> <span id="insightContext">Derived from registered LULC and change statistics. No values are simulated.</span></p>
+                    </div>
+                </section>
+            </div>
+            <div class="gis-compare-bar" id="compareBar">
+                <div class="gis-mode-switch" role="group" aria-label="Compare mode">
+                    <button type="button" data-mode="single" class="is-active" aria-pressed="true">Single</button>
+                    <button type="button" data-mode="swipe" aria-pressed="false">Swipe</button>
+                    <button type="button" data-mode="split" aria-pressed="false">Side by side</button>
+                </div>
+                <span class="gis-compare-divider" aria-hidden="true"></span>
+                <div class="gis-year-block">
+                    <span class="gis-year-label">LULC year</span>
+                    <div class="gis-year-chips" id="yearChips" role="group" aria-label="Land cover year"></div>
+                    <button class="gis-play" id="yearPlay" type="button" title="Play year sequence" aria-label="Play year sequence" aria-pressed="false"><i class="bi bi-play-fill"></i></button>
+                </div>
+                <div class="gis-compare-selects" id="compareSelects" hidden>
+                    <label>A <select id="yearSelectA" aria-label="Year for map A"></select></label>
+                    <label>B <select id="yearSelectB" aria-label="Year for map B"></select></label>
+                </div>
+            </div>
+            <div class="gis-minimap-wrap">
+                <div id="miniMap" aria-hidden="true"></div>
+                <span>© OpenStreetMap</span>
+            </div>
+            <div class="gis-north" aria-hidden="true"><span>N</span><i class="bi bi-caret-up-fill"></i></div>
+            <div class="gis-statusbar">
+                <span><i class="bi bi-geo-alt"></i> <span id="mapCoordinates">Move over map</span></span>
+                <span><i class="bi bi-zoom-in"></i> z<span id="mapZoom">2</span></span>
+                <span id="mapMessage" class="gis-map-message"></span>
+                <span><i class="bi bi-layers"></i> <span id="layerCount">0</span> layers</span>
+                <span><i class="bi bi-rulers"></i> EPSG:3857</span>
+            </div>
+            <div id="mapPopup" class="gis-popup" hidden>
+                <button class="gis-popup-close" id="mapPopupClose" type="button" aria-label="Close popup"><i class="bi bi-x-lg"></i></button>
+                <div id="mapPopupBody"></div>
+            </div>
+            <div class="gis-info-sheet" id="layerInfo" hidden>
+                <button class="gis-popup-close" id="layerInfoClose" type="button" aria-label="Close layer information"><i class="bi bi-x-lg"></i></button>
+                <div id="layerInfoBody"></div>
+            </div>
+            <div class="gis-progress" id="mapProgress" hidden><span></span></div>
+            <div class="gis-toasts" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+        </div>
+    </div>
+    <div class="gis-loading-overlay" id="mapSkeleton" hidden>
+        <div class="gis-loading-card"><span class="gis-spinner"></span><strong>Loading registered layers…</strong><small>Reading georeferenced products from the database</small></div>
+    </div>
 </div>
-<div class="gis-layout">
-    <aside class="gis-panel panel">
-        <div class="panel-heading">
-            <div><span class="muted-label">Workspace</span>
-                <h3>Map layers</h3>
-            </div><i class="bi bi-layers status-info"></i>
-        </div>
-        <label class="gis-label" for="forestSelect">Forest</label><select id="forestSelect"
-            class="form-select gis-select" data-selected="{{ forest.code }}">
-            {% for f in forests %}
-            <option value="{{ f.code }}">{{ f.name }}</option>
-            {% endfor %}
-        </select>
-        <div class="layer-group"><span class="layer-group-title">FOREST</span><label class="layer-row"><input
-                    class="form-check-input" type="checkbox" id="boundary" checked><span
-                    class="layer-swatch boundary-swatch"></span><span>Forest boundary</span><i
-                    class="bi bi-eye"></i></label></div>
-        <div class="layer-group"><span class="layer-group-title">REGISTERED PRODUCTS</span>
-            {% if forest.raster_layers.count %}
-            <div class="layer-note"><i class="bi bi-info-circle"></i><span>{{ forest.raster_layers.count }} raster
-                    product{{ forest.raster_layers.count|pluralize }} registered. Products remain referenced through the
-                    data catalogue and are not sent wholesale to the browser.</span></div>
-            {% endif %}
-            {% if not forest.raster_layers.count %}<div class="empty-layer"><i class="bi bi-layers"></i><span>No raster
-                    layers registered for this forest.</span></div>{% endif %}
-        </div>
-        <div class="map-legend"><span class="layer-group-title">LEGEND</span>
-            <div><span class="legend-swatch boundary-swatch"></span> Forest boundary</div>
-        </div>
-        <a class="btn btn-forest w-100 mt-3" href="/">Return to overview <i class="bi bi-arrow-right ms-1"></i></a>
-    </aside>
-    <section class="map-frame">
-        <div class="map-toolbar" role="toolbar" aria-label="Map controls"><button type="button" title="Layers"><i
-                    class="bi bi-layers"></i></button><button type="button" title="Identify"><i
-                    class="bi bi-cursor"></i></button><button type="button" title="Reset view"
-                onclick="window.resetMapView && window.resetMapView()"><i class="bi bi-crosshair"></i></button><button
-                type="button" title="Fullscreen" onclick="document.getElementById('map').requestFullscreen()"><i
-                    class="bi bi-fullscreen"></i></button></div>
-        <div id="map"></div>
-        <div class="map-status"><span><i class="bi bi-geo-alt"></i> <span id="mapCoordinates">Map
-                    view</span></span><span><i class="bi bi-rulers"></i> OpenLayers map</span></div>
-    </section>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/ol@10.2.1/dist/ol.js"></script>
 <script>
-    window.FGMDSS = { forestCode: "{{ forest.code|default:'' }}" };
+    window.FGMDSS = { forestCode: "{{ forest.code|default:'' }}", forestName: "{{ forest.name|escapejs }}", areaDisplay: "{{ summary.area_display|default:''|escapejs }}" };
+    window.FGMDSS_BASEMAPS = {{ basemaps_json | safe }};
 </script>
-<script src="{% static 'js/map.js' %}"></script>
+<script src="{% static 'vendor/ol.js' %}"></script>
+<script src="{% static 'vendor/echarts.min.js' %}"></script>
+<script src="{% static 'js/map.js' %}?v=20261027-8"></script>
 {% endblock %}

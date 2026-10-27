@@ -1,0 +1,37 @@
+{% load static %}
+<section class="panel chart-panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Remote-sensing-based anthropogenic pressure proxy</span>
+            <h2>Built-up and quarry expansion</h2>
+        </div>
+    </div>
+    <div class="chart" data-chart="pressure"></div>
+    <p class="methodology-panel">This proxy describes remotely detectable spatial expansion. It does not directly
+        measure human behaviour or establish causal human impact.</p>
+</section>
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Imported source table</span>
+            <h2>Expansion areas</h2>
+        </div>
+    </div>
+    <table class="professional-table">
+        <thead>
+            <tr>
+                <th>Indicator</th>
+                <th>Area</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>{% for row in pressure_rows %}<tr>
+                <td>{{ row.Indicator }}</td>
+                <td>{{ row.area_display }}</td>
+                <td>Derived proxy</td>
+            </tr>{% empty %}<tr>
+                <td colspan="3">BuiltUp_Quarry_Expansion_Areas.csv is awaiting import.</td>
+            </tr>{% endfor %}</tbody>
+    </table>
+</section>
+<script src="{% static 'vendor/echarts.min.js' %}"></script>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ section_api_url }}"; window.FGMDSS_SECTION = "pressure";</script>
+<script src="{% static 'js/analytics.js' %}"></script>

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Data Imports | FM-GDSS{% endblock %}
+{% block content %}
+<div class="page-intro">
+    <div><span class="muted-label">Provenance pipeline</span>
+        <h1>Data Imports</h1>
+        <p>Validated import commands connect exported research products to the database. Imports are idempotent:
+            re-running a command updates existing records instead of duplicating them.</p>
+    </div>{% if forest %}<span class="data-badge derived"><i class="bi bi-tree"></i> {{ forest.name }}</span>{% endif %}
+</div>
+{% if forest %}
+<section class="panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Import status</span>
+            <h2>Registered datasets for {{ forest.name }}</h2>
+        </div>
+    </div>
+    <div class="availability-list imports-status">
+        {% for label, available, command in status_rows %}
+        <div>
+            <span class="availability-dot {% if available %}available{% else %}unavailable{% endif %}"></span>
+            <span class="availability-label">{{ label }}</span>
+            <b>{% if available %}Available{% else %}Awaiting data{% endif %}</b>
+            <small>{{ command }}</small>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<section class="panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Command reference</span>
+            <h2>Import commands</h2>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="professional-table">
+            <thead>
+                <tr>
+                    <th>Command</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>{% for command, description in commands %}<tr>
+                    <td><code class="command-chip">python manage.py {{ command }}</code></td>
+                    <td>{{ description }}</td>
+                </tr>{% endfor %}</tbody>
+        </table>
+    </div>
+    <div class="methodology-panel mt-3"><i class="bi bi-shield-check"></i>
+        <div><span class="muted-label">Data policy</span>
+            <p>Source exports are opened read-only and never modified. Presentation products (JPG/PNG/PDF) are never
+                represented as georeferenced GIS layers, and proposed or modelled outputs are never displayed as field
+                truth.</p>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% if not forest %}<section class="empty-state">
+    <div class="empty-state-icon"><i class="bi bi-tree"></i></div><span class="muted-label">Workspace not
+        configured</span>
+    <h2>No active forest is registered</h2>
+    <p>Run the forest configuration command or create a forest record in Administration to begin.</p><a
+        class="btn btn-forest" href="/admin/">Open administration</a>
+</section>{% endif %}
+{% endblock %}

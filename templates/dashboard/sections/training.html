@@ -1,0 +1,33 @@
+{% load static %}<section class="panel chart-panel">
+    <div class="panel-heading">
+        <div><span class="muted-label">Forest-specific reference data</span>
+            <h2>Training and validation samples</h2>
+        </div>
+    </div>
+    <div class="chart" data-chart="training"></div>
+</section>
+<section class="panel analytics-workspace">
+    <table class="professional-table">
+        <thead>
+            <tr>
+                <th>Dataset</th>
+                <th>Samples</th>
+                <th>Training</th>
+                <th>Validation</th>
+                <th>CRS</th>
+            </tr>
+        </thead>
+        <tbody>{% for dataset in training_datasets %}<tr>
+                <td>{{ dataset.name }}</td>
+                <td>{{ dataset.sample_count }}</td>
+                <td>{{ dataset.training_count }}</td>
+                <td>{{ dataset.validation_count }}</td>
+                <td>{{ dataset.crs }}</td>
+            </tr>{% empty %}<tr>
+                <td colspan="5">Training data is awaiting import. Run ingest_training_data for this forest.</td>
+            </tr>{% endfor %}</tbody>
+    </table>
+</section>
+<script src="{% static 'vendor/echarts.min.js' %}"></script>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ analytics_url }}"; window.FGMDSS_SECTION = "training";</script>
+<script src="{% static 'js/analytics.js' %}"></script>

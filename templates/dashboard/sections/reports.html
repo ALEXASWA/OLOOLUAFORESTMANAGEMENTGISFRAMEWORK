@@ -1,0 +1,15 @@
+{% load static %}
+<section class="panel analytics-workspace">
+    <div class="panel-heading">
+        <div><span class="muted-label">Approved outputs</span>
+            <h2>Reports and downloadable products</h2>
+        </div>
+    </div>
+    <p class="methodology-panel">Only supplied and registered reports or products are listed. No report is generated
+        from missing research data.</p>
+    <div id="metadata-table" class="table-responsive">
+        <p class="loading-state">Loading approved records...</p>
+    </div>
+</section>
+<script>window.FGMDSS_ANALYTICS_URL = "{{ analytics_url }}"; window.FGMDSS_SECTION = "reports";</script>
+<script src="{% static 'js/analytics.js' %}"></script>
